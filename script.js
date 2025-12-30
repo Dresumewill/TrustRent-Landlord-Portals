@@ -48,3 +48,22 @@ function simulateUpload(btnElement, points) {
     
     input.click();
 }
+
+/**
+ * Updates UI and Trust Score when a task is completed
+ */
+function markAsVerified(btnElement, points) {
+    if (btnElement.classList.contains('btn-verified')) return;
+
+    // Update Button State
+    btnElement.textContent = "✓ Verified";
+    btnElement.className = "btn btn-verified";
+    btnElement.onclick = null; // Disable further clicks
+
+    // Update Trust Score
+    currentScore += points;
+    updateScoreUI();
+    
+    // Check if ready to publish
+    checkCompletion();
+}
