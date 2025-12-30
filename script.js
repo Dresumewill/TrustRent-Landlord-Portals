@@ -98,3 +98,12 @@ function enablePublishing() {
     // Add Publish Handler
     publishBtn.onclick = handlePublish;
 }
+
+function handlePublish() {
+    // In a real app, this would send a POST request to your backend
+    alert("🎉 Success! Your property is now LIVE on the Trust Network.");
+    listingStatus.className = "status-pill status-live";
+    listingStatus.textContent = "Live & Verified";
+    publishBtn.textContent = "Published";
+    publishBtn.disabled = true;
+}
