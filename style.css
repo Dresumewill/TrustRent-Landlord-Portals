@@ -18,3 +18,11 @@ body { background-color: var(--light); color: var(--primary); display: flex; hei
 .menu-item { padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: 500; transition: 0.2s; }
 .menu-item.active { background: #e0f2fe; color: var(--accent); }
 .menu-item:hover { background: #f1f5f9; }
+
+/* Main Content */
+.main-content { flex: 1; padding: 40px; overflow-y: auto; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.subtitle { color: var(--text-muted); margin-top: 5px; }
+
+.trust-badge { display: flex; align-items: center; gap: 10px; background: white; padding: 10px 20px; border-radius: 50px; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.trust-score { font-weight: bold; color: var(--warning); }
