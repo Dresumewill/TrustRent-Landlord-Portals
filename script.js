@@ -78,3 +78,9 @@ function updateScoreUI() {
         scoreDisplay.style.color = "#10b981"; // Green
     }
 }
+
+function checkCompletion() {
+    if (currentScore >= SCORE_THRESHOLD) {
+        enablePublishing();
+    }
+}
