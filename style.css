@@ -38,3 +38,12 @@ body { background-color: var(--light); color: var(--primary); display: flex; hei
 .checklist-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
 .checklist-info h4 { margin-bottom: 4px; }
 .checklist-info p { font-size: 0.85rem; color: var(--text-muted); }
+
+/* Buttons */
+.btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: 0.2s; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #0284c7; }
+.btn-upload { background: white; border: 1px solid var(--border); color: var(--primary); }
+.btn-upload:hover { background: #f8fafc; border-color: #cbd5e1; }
+.btn-verified { background: var(--success); color: white; cursor: default; }
+.btn-disabled { width: 100%; margin-top: 20px; background-color: #cbd5e1; cursor: not-allowed; color: white; }
