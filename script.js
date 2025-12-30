@@ -67,3 +67,14 @@ function markAsVerified(btnElement, points) {
     // Check if ready to publish
     checkCompletion();
 }
+
+function updateScoreUI() {
+    scoreDisplay.textContent = currentScore + "%";
+    
+    // Dynamic color coding
+    if (currentScore >= 50 && currentScore < 80) {
+        scoreDisplay.style.color = "#f59e0b"; // Orange/Yellow
+    } else if (currentScore >= 80) {
+        scoreDisplay.style.color = "#10b981"; // Green
+    }
+}
