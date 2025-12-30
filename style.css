@@ -1,0 +1,9 @@
+:root {
+    --primary: #0f172a; /* Deep Navy - Stability */
+    --accent: #0ea5e9;  /* Trust Blue */
+    --success: #10b981; /* Verified Green */
+    --warning: #f59e0b;
+    --light: #f8fafc;
+    --border: #e2e8f0;
+    --text-muted: #64748b;
+}
