@@ -7,3 +7,14 @@
     --border: #e2e8f0;
     --text-muted: #64748b;
 }
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+
+body { background-color: var(--light); color: var(--primary); display: flex; height: 100vh; }
+
+/* Sidebar Navigation */
+.sidebar { width: 250px; background: white; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+.logo { font-size: 1.5rem; font-weight: 800; margin-bottom: 40px; color: var(--accent); }
+.menu-item { padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: 500; transition: 0.2s; }
+.menu-item.active { background: #e0f2fe; color: var(--accent); }
+.menu-item:hover { background: #f1f5f9; }
