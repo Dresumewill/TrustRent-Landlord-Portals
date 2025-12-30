@@ -84,3 +84,17 @@ function checkCompletion() {
         enablePublishing();
     }
 }
+
+function enablePublishing() {
+    publishBtn.disabled = false;
+    publishBtn.classList.remove('btn-disabled');
+    publishBtn.classList.add('btn-primary');
+    publishBtn.textContent = "Publish Now";
+    publishBtn.style.cursor = "pointer";
+    
+    errorMsg.style.display = "none";
+    listingCard.style.opacity = "1";
+    
+    // Add Publish Handler
+    publishBtn.onclick = handlePublish;
+}
