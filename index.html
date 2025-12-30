@@ -56,9 +56,32 @@
                             </div>
                             <button class="btn btn-upload" onclick="startVerification(this, 20)">Authorize</button>
                         </div>
+
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <h2>Your listings</h2>
+                        <div class="listing-preview" id="listing-card">
+                            <div class="listing-image">
+                                Property Image
+                            </div>
+                            <h3>123 Trust Avenue, NY</h3>
+                            <div class="listing-meta">
+                                <span class="status-pill status-pending" id="listing-status">Draft - Unverified</span>
+                            </div>
+                        </div>
+                        <button id="publish-btn" class="btn btn-disabled" disabled>
+                            Publish Listing
+                        </button>
+                        <p class="error-msg" id="error-msg">
+                            Complete checklist to Publish.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
+        
     </body>
 </html>
