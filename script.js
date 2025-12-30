@@ -24,3 +24,27 @@ function startVerification(btnElement, points) {
         markAsVerified(btnElement, points);
     }, 2000);
 }
+
+/**
+ * Simulates a file upload process (e.g., uploading Deed to S3)
+ * @param {HTMLElement} btnElement 
+ * @param {number} points 
+ */
+function simulateUpload(btnElement, points) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,application/pdf';
+    
+    input.onchange = (e) => {
+        if (e.target.files.length > 0) {
+            showModal();
+            // Simulate processing time
+            setTimeout(() => {
+                hideModal();
+                markAsVerified(btnElement, points);
+            }, 1500);
+        }
+    };
+    
+    input.click();
+}
