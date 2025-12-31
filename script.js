@@ -107,3 +107,12 @@ function handlePublish() {
     publishBtn.textContent = "Published";
     publishBtn.disabled = true;
 }
+
+// Modal Helpers
+function showModal() {
+    modal.style.display = 'flex';
+}
+
+function hideModal() {
+    modal.style.display = 'none';
+}
