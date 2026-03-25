@@ -29,25 +29,34 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isLandlordRoute = path.startsWith("/landlord");
-  const isTenantRoute = path.startsWith("/tenant");
+  const isTenantRoute   = path.startsWith("/tenant");
+  const isAdminRoute    = path.startsWith("/admin");
 
   // Redirect unauthenticated users to login
-  if (!user && (isLandlordRoute || isTenantRoute)) {
+  if (!user && (isLandlordRoute || isTenantRoute || isAdminRoute)) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // Role-based route protection
-  if (user && (isLandlordRoute || isTenantRoute)) {
+  if (user && (isLandlordRoute || isTenantRoute || isAdminRoute)) {
     const { data: profile } = await supabase
       .from("users")
       .select("role")
       .eq("id", user.id)
       .single();
 
-    if (profile?.role === "tenant" && isLandlordRoute) {
+    const role = profile?.role;
+
+    // Admin routes — only admins allowed
+    if (isAdminRoute && role !== "admin") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    // Cross-role guards for landlord / tenant routes
+    if (role === "tenant" && isLandlordRoute) {
       return NextResponse.redirect(new URL("/tenant/dashboard", request.url));
     }
-    if (profile?.role === "landlord" && isTenantRoute) {
+    if (role === "landlord" && isTenantRoute) {
       return NextResponse.redirect(new URL("/landlord/dashboard", request.url));
     }
   }
@@ -56,5 +65,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/landlord/:path*", "/tenant/:path*"],
+  matcher: ["/landlord/:path*", "/tenant/:path*", "/admin/:path*"],
 };
