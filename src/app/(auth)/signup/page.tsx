@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 function SignupForm() {
@@ -20,6 +21,7 @@ function SignupForm() {
   const [role, setRole] = useState<"tenant" | "landlord">(defaultRole);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   async function handleSignup(e: { preventDefault(): void }) {
     e.preventDefault();
@@ -41,7 +43,33 @@ function SignupForm() {
       return;
     }
 
-    router.push(role === "landlord" ? "/landlord/dashboard" : "/tenant/dashboard");
+    // If email confirmation is required, data.user will be set but session will be null.
+    // Redirect straight to dashboard only when session exists (auto-confirm enabled).
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      router.push(role === "landlord" ? "/landlord/dashboard" : "/tenant/dashboard");
+    } else {
+      setEmailSent(true);
+      setLoading(false);
+    }
+  }
+
+  if (emailSent) {
+    return (
+      <Card className="w-full max-w-md shadow-lg">
+        <CardContent className="pt-10 pb-10 flex flex-col items-center gap-4 text-center">
+          <CheckCircle2 className="h-12 w-12 text-emerald-600" />
+          <h2 className="text-xl font-bold">Check your email</h2>
+          <p className="text-muted-foreground text-sm">
+            We sent a confirmation link to <span className="font-medium text-foreground">{email}</span>.
+            Click it to activate your account and sign in.
+          </p>
+          <Link href="/login" className="text-emerald-600 font-medium hover:underline text-sm">
+            Back to Sign In
+          </Link>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

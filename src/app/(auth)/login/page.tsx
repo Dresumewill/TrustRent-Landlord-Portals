@@ -24,8 +24,8 @@ export default function LoginPage() {
     const supabase = createClient();
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (authError) {
-      setError(authError.message);
+    if (authError || !data.user) {
+      setError(authError?.message ?? "Sign in failed. Please try again.");
       setLoading(false);
       return;
     }
@@ -39,6 +39,8 @@ export default function LoginPage() {
 
     if (profile?.role === "landlord") {
       router.push("/landlord/dashboard");
+    } else if (profile?.role === "admin") {
+      router.push("/admin/dashboard");
     } else {
       router.push("/tenant/dashboard");
     }
