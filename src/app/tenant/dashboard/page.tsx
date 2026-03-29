@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/lib/button-variants";
 import { Search, FileText, Star, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { cn, fmtAmount } from "@/lib/utils";
+import { cn, fmtCurrency } from "@/lib/utils";
 
 export default async function TenantDashboard() {
   const supabase = await createClient();
@@ -14,7 +14,7 @@ export default async function TenantDashboard() {
     supabase.from("users").select("full_name, trust_score, verification_status").eq("id", user?.id ?? "").single(),
     supabase
       .from("applications")
-      .select("id, status, created_at, properties(title, city, state, rent_amount)")
+      .select("id, status, created_at, properties(title, city, state, rent_amount, currency)")
       .eq("tenant_id", user?.id ?? "")
       .order("created_at", { ascending: false })
       .limit(5),
@@ -93,7 +93,7 @@ export default async function TenantDashboard() {
           ) : (
             <div className="flex flex-col divide-y">
               {applications.map((app) => {
-                type PropShape = { title: string; city: string; state: string; rent_amount: number };
+                type PropShape = { title: string; city: string; state: string; rent_amount: number; currency: string };
                 const property = (Array.isArray(app.properties)
                   ? app.properties[0]
                   : app.properties) as PropShape | null;
@@ -102,7 +102,7 @@ export default async function TenantDashboard() {
                     <div>
                       <p className="text-sm font-medium">{property?.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {property?.city}, {property?.state} · ₦{fmtAmount(Number(property?.rent_amount))}/mo
+                        {property?.city}, {property?.state} · {fmtCurrency(Number(property?.rent_amount), property?.currency)}/mo
                       </p>
                     </div>
                     <Badge variant={app.status === "approved" ? "default" : "secondary"} className="capitalize">

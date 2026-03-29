@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/button-variants";
-import { cn, fmtAmount, fmtDate } from "@/lib/utils";
+import { cn, fmtCurrency, fmtDate } from "@/lib/utils";
 
 export default async function DisputesPage() {
   const db = createAdminClient();
@@ -16,7 +16,7 @@ export default async function DisputesPage() {
   const { data: disputes } = await db
     .from("transactions")
     .select(`
-      id, amount, status, created_at, admin_resolved_at,
+      id, amount, currency, status, created_at, admin_resolved_at,
       properties(title, city, state),
       payer:payer_id(full_name, email),
       payee:payee_id(full_name, email)
@@ -89,7 +89,7 @@ export default async function DisputesPage() {
                         <p className="text-xs text-slate-400">{landlord?.email}</p>
                       </TableCell>
                       <TableCell>
-                        <span className="font-bold text-red-700">₦{fmtAmount(Number(dispute.amount))}</span>
+                        <span className="font-bold text-red-700">{fmtCurrency(Number(dispute.amount), dispute.currency)}</span>
                       </TableCell>
                       <TableCell className="text-slate-500 text-sm">
                         {fmtDate(dispute.created_at)}
@@ -149,7 +149,7 @@ export default async function DisputesPage() {
                       <TableCell className="text-sm text-slate-600">{tenant?.full_name ?? "—"}</TableCell>
                       <TableCell className="text-sm text-slate-600">{landlord?.full_name ?? "—"}</TableCell>
                       <TableCell className="text-sm text-slate-700 font-medium">
-                        ₦{fmtAmount(Number(dispute.amount))}
+                        {fmtCurrency(Number(dispute.amount), dispute.currency)}
                       </TableCell>
                       <TableCell>
                         <Badge

@@ -9,7 +9,7 @@ import {
   AlertTriangle,
   TrendingUp,
 } from "lucide-react";
-import { fmtAmount } from "@/lib/utils";
+import { fmtCurrency } from "@/lib/utils";
 
 export default async function AdminDashboardPage() {
   // Auth guard (middleware also guards, but belt-and-suspenders for RSC)
@@ -33,10 +33,17 @@ export default async function AdminDashboardPage() {
   // ── Escrow totals ──
   const { data: escrowTxs } = await db
     .from("transactions")
-    .select("amount")
+    .select("amount, currency")
     .eq("status", "held_in_escrow");
 
-  const totalEscrow = (escrowTxs ?? []).reduce((sum, t) => sum + Number(t.amount), 0);
+  // Group by currency for multi-country support
+  const escrowByCurrency: Record<string, number> = {};
+  (escrowTxs ?? []).forEach((t) => {
+    escrowByCurrency[t.currency] = (escrowByCurrency[t.currency] ?? 0) + Number(t.amount);
+  });
+  const totalEscrow = Object.entries(escrowByCurrency)
+    .map(([code, amt]) => fmtCurrency(amt, code))
+    .join(" + ") || "—";
 
   // ── Dispute rate ──
   const { count: totalTxCount } = await db
@@ -74,7 +81,7 @@ export default async function AdminDashboardPage() {
     },
     {
       label: "Funds in Escrow",
-      value: `₦${fmtAmount(totalEscrow)}`,
+      value: totalEscrow,
       sub: `${escrowTxs?.length ?? 0} active deposits`,
       icon: Wallet,
       color: "text-blue-600",

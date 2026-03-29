@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EscrowActions } from "@/components/tenant/EscrowActions";
-import { fmtAmount, fmtDate } from "@/lib/utils";
+import { fmtCurrency, fmtDate } from "@/lib/utils";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive"> = {
   pending: "secondary",
@@ -23,9 +23,11 @@ export default async function TenantPaymentsPage() {
     .eq("payer_id", user?.id ?? "")
     .order("created_at", { ascending: false });
 
-  const total = transactions
-    ?.filter((t) => t.status === "completed")
-    .reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
+  // Group completed totals by currency
+  const totals: Record<string, number> = {};
+  transactions?.filter((t) => t.status === "completed").forEach((t) => {
+    totals[t.currency] = (totals[t.currency] ?? 0) + Number(t.amount);
+  });
 
   return (
     <div className="p-8">
@@ -37,7 +39,15 @@ export default async function TenantPaymentsPage() {
       <Card className="mb-6">
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground">Total Paid</p>
-          <p className="text-3xl font-bold text-emerald-700">₦{fmtAmount(total)}</p>
+          {Object.keys(totals).length === 0 ? (
+            <p className="text-3xl font-bold text-emerald-700">—</p>
+          ) : (
+            Object.entries(totals).map(([code, amt]) => (
+              <p key={code} className="text-3xl font-bold text-emerald-700">
+                {fmtCurrency(amt, code)}
+              </p>
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -61,7 +71,7 @@ export default async function TenantPaymentsPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold">₦{fmtAmount(Number(tx.amount))}</span>
+                      <span className="font-semibold">{fmtCurrency(Number(tx.amount), tx.currency)}</span>
                       <Badge variant={statusColors[tx.status] ?? "secondary"} className="capitalize text-xs">
                         {tx.status.replace(/_/g, " ")}
                       </Badge>

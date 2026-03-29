@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/lib/button-variants";
 import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { cn, fmtAmount } from "@/lib/utils";
+import { cn, fmtCurrency } from "@/lib/utils";
 import { SearchForm } from "@/components/tenant/SearchForm";
 
 interface SearchParams {
@@ -65,7 +65,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-emerald-700 text-lg">
-                    ₦{fmtAmount(Number(property.rent_amount))}
+                    {fmtCurrency(Number(property.rent_amount), property.currency)}
                     <span className="text-sm font-normal text-muted-foreground">/mo</span>
                   </span>
                   <Badge variant="secondary" className="capitalize">{property.property_type}</Badge>

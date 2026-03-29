@@ -1,8 +1,18 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { getCurrencySymbol } from "@/lib/currencies"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Format a monetary amount with the correct African currency symbol.
+ * e.g. fmtCurrency(150000, "NGN") → "₦150,000"
+ *      fmtCurrency(5000, "KES")   → "KSh5,000"
+ */
+export function fmtCurrency(amount: number, currencyCode = "NGN"): string {
+  return `${getCurrencySymbol(currencyCode)}${fmtAmount(amount)}`
 }
 
 /**

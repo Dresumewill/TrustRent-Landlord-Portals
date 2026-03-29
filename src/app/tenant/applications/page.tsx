@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/button-variants";
-import { cn } from "@/lib/utils";
+import { cn, fmtCurrency, fmtDate } from "@/lib/utils";
 import { CreditCard } from "lucide-react";
-import { fmtAmount, fmtDate } from "@/lib/utils";
 
 export default async function TenantApplicationsPage() {
   const supabase = await createClient();
@@ -13,7 +12,7 @@ export default async function TenantApplicationsPage() {
 
   const { data: applications } = await supabase
     .from("applications")
-    .select("*, properties(title, city, state, rent_amount, deposit_amount, landlord_id)")
+    .select("*, properties(title, city, state, rent_amount, deposit_amount, currency, landlord_id)")
     .eq("tenant_id", user?.id ?? "")
     .order("created_at", { ascending: false });
 
@@ -44,7 +43,7 @@ export default async function TenantApplicationsPage() {
           {applications.map((app) => {
             const property = app.properties as {
               title: string; city: string; state: string;
-              rent_amount: number; deposit_amount: number;
+              rent_amount: number; deposit_amount: number; currency: string;
             } | null;
 
             const depositAmount = Number(property?.deposit_amount) > 0
@@ -71,11 +70,11 @@ export default async function TenantApplicationsPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                     <div>
                       <p className="text-muted-foreground">Monthly Rent</p>
-                      <p className="font-medium">₦{fmtAmount(Number(property?.rent_amount))}</p>
+                      <p className="font-medium">{fmtCurrency(Number(property?.rent_amount), property?.currency)}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Deposit</p>
-                      <p className="font-medium">₦{fmtAmount(depositAmount)}</p>
+                      <p className="font-medium">{fmtCurrency(depositAmount, property?.currency)}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Move-In Date</p>

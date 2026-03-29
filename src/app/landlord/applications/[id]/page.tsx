@@ -2,11 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
-import { fmtAmount } from "@/lib/utils";
+import { fmtCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { buttonVariants } from "@/lib/button-variants";
 import { cn } from "@/lib/utils";
 import {
@@ -15,12 +14,10 @@ import {
   Mail,
   Phone,
   MapPin,
-  Briefcase,
   Star,
   ShieldCheck,
   CalendarDays,
   Users,
-  DollarSign,
   FileText,
 } from "lucide-react";
 
@@ -68,7 +65,7 @@ export default async function TenantPassportPage({ params }: Props) {
     .from("applications")
     .select(`
       *,
-      properties(id, title, city, state, rent_amount, landlord_id),
+      properties(id, title, city, state, rent_amount, currency, landlord_id),
       users(
         id, full_name, email, phone, avatar_url,
         role, verification_status, trust_score,
@@ -83,7 +80,7 @@ export default async function TenantPassportPage({ params }: Props) {
   // Security: only the landlord who owns the property can view this
   const property = application.properties as {
     id: string; title: string; city: string; state: string;
-    rent_amount: number; landlord_id: string;
+    rent_amount: number; currency: string; landlord_id: string;
   } | null;
 
   if (property?.landlord_id !== user?.id) notFound();
@@ -235,7 +232,7 @@ export default async function TenantPassportPage({ params }: Props) {
           </div>
           <div>
             <p className="text-muted-foreground">Monthly Rent</p>
-            <p className="font-medium">₦{fmtAmount(Number(property?.rent_amount))}</p>
+            <p className="font-medium">{fmtCurrency(Number(property?.rent_amount), property?.currency)}</p>
           </div>
           <div>
             <p className="text-muted-foreground">Desired Move-In</p>
@@ -253,7 +250,7 @@ export default async function TenantPassportPage({ params }: Props) {
             <p className="text-muted-foreground">Monthly Income</p>
             <p className="font-medium">
               {application.monthly_income
-                ? `₦${fmtAmount(Number(application.monthly_income))}`
+                ? fmtCurrency(Number(application.monthly_income), property?.currency)
                 : "Not stated"}
             </p>
           </div>

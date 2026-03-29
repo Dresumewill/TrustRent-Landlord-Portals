@@ -17,7 +17,7 @@ export default async function PayDepositPage({ params }: Props) {
 
   const { data: application } = await supabase
     .from("applications")
-    .select("*, properties(id, title, city, state, rent_amount, deposit_amount)")
+    .select("*, properties(id, title, city, state, rent_amount, deposit_amount, currency)")
     .eq("id", applicationId)
     .eq("tenant_id", user?.id ?? "")
     .single();
@@ -31,6 +31,7 @@ export default async function PayDepositPage({ params }: Props) {
     state: string;
     rent_amount: number;
     deposit_amount: number;
+    currency: string;
   } | null;
 
   if (!property) notFound();
@@ -60,6 +61,7 @@ export default async function PayDepositPage({ params }: Props) {
         applicationId={applicationId}
         propertyTitle={property.title}
         amount={depositAmount}
+        currency={property.currency}
       />
     </div>
   );

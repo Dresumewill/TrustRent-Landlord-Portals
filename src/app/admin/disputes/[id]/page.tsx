@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MessageSquare, Camera, Wallet, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/button-variants";
-import { cn, fmtAmount, fmtDate, fmtDateTime } from "@/lib/utils";
+import { cn, fmtCurrency, fmtDate, fmtDateTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DisputeActions } from "@/components/admin/DisputeActions";
@@ -25,7 +25,7 @@ export default async function DisputeMediationPage({ params }: Props) {
   const { data: tx } = await db
     .from("transactions")
     .select(`
-      id, amount, status, created_at, admin_notes, dispute_evidence,
+      id, amount, currency, status, created_at, admin_notes, dispute_evidence,
       properties(title, city, state, address_line1),
       payer:payer_id(id, full_name, email),
       payee:payee_id(id, full_name, email)
@@ -95,7 +95,7 @@ export default async function DisputeMediationPage({ params }: Props) {
               </div>
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Frozen Escrow</p>
-                <p className="font-bold text-red-700 text-lg">₦{fmtAmount(Number(tx.amount))}</p>
+                <p className="font-bold text-red-700 text-lg">{fmtCurrency(Number(tx.amount), tx.currency)}</p>
                 <p className="text-xs text-slate-400 flex items-center gap-1">
                   <Wallet className="h-3 w-3" />
                   Opened {fmtDate(tx.created_at)}
@@ -199,6 +199,7 @@ export default async function DisputeMediationPage({ params }: Props) {
             <DisputeActions
               transactionId={tx.id}
               amount={Number(tx.amount)}
+              currency={tx.currency}
               tenantName={tenant?.full_name ?? "Tenant"}
               landlordName={landlord?.full_name ?? "Landlord"}
             />
