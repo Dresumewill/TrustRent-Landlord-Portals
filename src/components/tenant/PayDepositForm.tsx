@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CreditCard, Lock, CheckCircle2 } from "lucide-react";
 import { payDeposit } from "@/app/actions/escrow";
+import { fmtAmount } from "@/lib/utils";
 
 interface PayDepositFormProps {
   applicationId: string;
@@ -48,7 +49,7 @@ export function PayDepositForm({ applicationId, propertyTitle, amount }: PayDepo
           <CheckCircle2 className="h-12 w-12 text-emerald-600" />
           <h2 className="text-xl font-bold">Deposit Paid!</h2>
           <p className="text-muted-foreground text-sm">
-            ₦{amount.toLocaleString()} is now held securely in escrow.
+            ₦{fmtAmount(amount)} is now held securely in escrow.
             Redirecting to your payments…
           </p>
         </CardContent>
@@ -116,7 +117,7 @@ export function PayDepositForm({ applicationId, propertyTitle, amount }: PayDepo
 
           <div className="rounded-lg bg-slate-50 border border-border p-4 flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Deposit Amount</span>
-            <span className="text-lg font-bold text-emerald-700">₦{amount.toLocaleString()}</span>
+            <span className="text-lg font-bold text-emerald-700">₦{fmtAmount(amount)}</span>
           </div>
 
           {error && (
@@ -128,7 +129,7 @@ export function PayDepositForm({ applicationId, propertyTitle, amount }: PayDepo
             disabled={loading}
             className="bg-emerald-600 hover:bg-emerald-700 text-white w-full"
           >
-            {loading ? "Processing…" : `Pay ₦${amount.toLocaleString()} into Escrow`}
+            {loading ? "Processing…" : `Pay ₦${fmtAmount(amount)} into Escrow`}
           </Button>
 
           <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">

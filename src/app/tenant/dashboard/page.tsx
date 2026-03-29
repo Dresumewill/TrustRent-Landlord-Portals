@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/lib/button-variants";
 import { Search, FileText, Star, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, fmtAmount } from "@/lib/utils";
 
 export default async function TenantDashboard() {
   const supabase = await createClient();
@@ -102,7 +102,7 @@ export default async function TenantDashboard() {
                     <div>
                       <p className="text-sm font-medium">{property?.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {property?.city}, {property?.state} · ₦{Number(property?.rent_amount).toLocaleString()}/mo
+                        {property?.city}, {property?.state} · ₦{fmtAmount(Number(property?.rent_amount))}/mo
                       </p>
                     </div>
                     <Badge variant={app.status === "approved" ? "default" : "secondary"} className="capitalize">

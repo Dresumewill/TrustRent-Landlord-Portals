@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   TrendingUp,
 } from "lucide-react";
+import { fmtAmount } from "@/lib/utils";
 
 export default async function AdminDashboardPage() {
   // Auth guard (middleware also guards, but belt-and-suspenders for RSC)
@@ -73,7 +74,7 @@ export default async function AdminDashboardPage() {
     },
     {
       label: "Funds in Escrow",
-      value: `₦${totalEscrow.toLocaleString()}`,
+      value: `₦${fmtAmount(totalEscrow)}`,
       sub: `${escrowTxs?.length ?? 0} active deposits`,
       icon: Wallet,
       color: "text-blue-600",

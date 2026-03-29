@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, RotateCcw, AlertCircle, ShieldCheck } from "lucide-react";
 import { releaseDisputeFundsToLandlord, refundDisputeFundsToTenant } from "@/app/actions/admin";
+import { fmtAmount } from "@/lib/utils";
 
 interface DisputeActionsProps {
   transactionId: string;
@@ -44,8 +45,8 @@ export function DisputeActions({
         type: "success",
         message:
           decision === "release"
-            ? `₦${amount.toLocaleString()} released to ${landlordName}. Decision logged.`
-            : `₦${amount.toLocaleString()} refunded to ${tenantName}. Decision logged.`,
+            ? `₦${fmtAmount(amount)} released to ${landlordName}. Decision logged.`
+            : `₦${fmtAmount(amount)} refunded to ${tenantName}. Decision logged.`,
       });
     }
     setLoading(false);
@@ -86,7 +87,7 @@ export function DisputeActions({
             Release to Landlord
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
-            ₦{amount.toLocaleString()} → {landlordName}
+            ₦{fmtAmount(amount)} → {landlordName}
           </p>
         </button>
 
@@ -104,7 +105,7 @@ export function DisputeActions({
             Refund to Tenant
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
-            ₦{amount.toLocaleString()} → {tenantName}
+            ₦{fmtAmount(amount)} → {tenantName}
           </p>
         </button>
       </div>

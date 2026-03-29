@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
+import { fmtAmount } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -234,7 +235,7 @@ export default async function TenantPassportPage({ params }: Props) {
           </div>
           <div>
             <p className="text-muted-foreground">Monthly Rent</p>
-            <p className="font-medium">₦{Number(property?.rent_amount).toLocaleString()}</p>
+            <p className="font-medium">₦{fmtAmount(Number(property?.rent_amount))}</p>
           </div>
           <div>
             <p className="text-muted-foreground">Desired Move-In</p>
@@ -252,7 +253,7 @@ export default async function TenantPassportPage({ params }: Props) {
             <p className="text-muted-foreground">Monthly Income</p>
             <p className="font-medium">
               {application.monthly_income
-                ? `₦${Number(application.monthly_income).toLocaleString()}`
+                ? `₦${fmtAmount(Number(application.monthly_income))}`
                 : "Not stated"}
             </p>
           </div>

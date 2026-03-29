@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MessageSquare, Camera, Wallet, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/button-variants";
-import { cn } from "@/lib/utils";
+import { cn, fmtAmount, fmtDate, fmtDateTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DisputeActions } from "@/components/admin/DisputeActions";
@@ -95,12 +95,10 @@ export default async function DisputeMediationPage({ params }: Props) {
               </div>
               <div>
                 <p className="text-xs text-slate-500 mb-0.5">Frozen Escrow</p>
-                <p className="font-bold text-red-700 text-lg">₦{Number(tx.amount).toLocaleString()}</p>
+                <p className="font-bold text-red-700 text-lg">₦{fmtAmount(Number(tx.amount))}</p>
                 <p className="text-xs text-slate-400 flex items-center gap-1">
                   <Wallet className="h-3 w-3" />
-                  Opened {new Date(tx.created_at).toLocaleDateString("en-GB", {
-                    day: "numeric", month: "short", year: "numeric",
-                  })}
+                  Opened {fmtDate(tx.created_at)}
                 </p>
               </div>
             </CardContent>
@@ -140,9 +138,7 @@ export default async function DisputeMediationPage({ params }: Props) {
                       </div>
                       <p className="text-xs text-slate-400 px-1">
                         {msg.from === "tenant" ? tenant?.full_name : landlord?.full_name} ·{" "}
-                        {new Date(msg.timestamp).toLocaleString("en-GB", {
-                          day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
-                        })}
+                        {fmtDateTime(msg.timestamp)}
                       </p>
                     </div>
                   ))}

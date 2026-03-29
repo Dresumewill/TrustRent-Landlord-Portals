@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/button-variants";
-import { cn } from "@/lib/utils";
+import { cn, fmtAmount, fmtDate } from "@/lib/utils";
 
 export default async function DisputesPage() {
   const db = createAdminClient();
@@ -89,12 +89,10 @@ export default async function DisputesPage() {
                         <p className="text-xs text-slate-400">{landlord?.email}</p>
                       </TableCell>
                       <TableCell>
-                        <span className="font-bold text-red-700">₦{Number(dispute.amount).toLocaleString()}</span>
+                        <span className="font-bold text-red-700">₦{fmtAmount(Number(dispute.amount))}</span>
                       </TableCell>
                       <TableCell className="text-slate-500 text-sm">
-                        {new Date(dispute.created_at).toLocaleDateString("en-GB", {
-                          day: "numeric", month: "short", year: "numeric",
-                        })}
+                        {fmtDate(dispute.created_at)}
                       </TableCell>
                       <TableCell className="pr-6 text-right">
                         <Link
@@ -151,7 +149,7 @@ export default async function DisputesPage() {
                       <TableCell className="text-sm text-slate-600">{tenant?.full_name ?? "—"}</TableCell>
                       <TableCell className="text-sm text-slate-600">{landlord?.full_name ?? "—"}</TableCell>
                       <TableCell className="text-sm text-slate-700 font-medium">
-                        ₦{Number(dispute.amount).toLocaleString()}
+                        ₦{fmtAmount(Number(dispute.amount))}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -162,11 +160,7 @@ export default async function DisputesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="pr-6 text-slate-400 text-sm">
-                        {dispute.admin_resolved_at
-                          ? new Date(dispute.admin_resolved_at).toLocaleDateString("en-GB", {
-                              day: "numeric", month: "short", year: "numeric",
-                            })
-                          : "—"}
+                        {dispute.admin_resolved_at ? fmtDate(dispute.admin_resolved_at) : "—"}
                       </TableCell>
                     </TableRow>
                   );

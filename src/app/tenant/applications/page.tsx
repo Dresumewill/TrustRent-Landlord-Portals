@@ -5,6 +5,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/lib/button-variants";
 import { cn } from "@/lib/utils";
 import { CreditCard } from "lucide-react";
+import { fmtAmount, fmtDate } from "@/lib/utils";
 
 export default async function TenantApplicationsPage() {
   const supabase = await createClient();
@@ -70,11 +71,11 @@ export default async function TenantApplicationsPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                     <div>
                       <p className="text-muted-foreground">Monthly Rent</p>
-                      <p className="font-medium">₦{Number(property?.rent_amount).toLocaleString()}</p>
+                      <p className="font-medium">₦{fmtAmount(Number(property?.rent_amount))}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Deposit</p>
-                      <p className="font-medium">₦{depositAmount.toLocaleString()}</p>
+                      <p className="font-medium">₦{fmtAmount(depositAmount)}</p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Move-In Date</p>
@@ -82,7 +83,7 @@ export default async function TenantApplicationsPage() {
                     </div>
                     <div>
                       <p className="text-muted-foreground">Applied On</p>
-                      <p className="font-medium">{new Date(app.created_at).toLocaleDateString()}</p>
+                      <p className="font-medium">{fmtDate(app.created_at)}</p>
                     </div>
                   </div>
 

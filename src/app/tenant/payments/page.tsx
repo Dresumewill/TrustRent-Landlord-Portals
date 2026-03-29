@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EscrowActions } from "@/components/tenant/EscrowActions";
+import { fmtAmount, fmtDate } from "@/lib/utils";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive"> = {
   pending: "secondary",
@@ -36,7 +37,7 @@ export default async function TenantPaymentsPage() {
       <Card className="mb-6">
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground">Total Paid</p>
-          <p className="text-3xl font-bold text-emerald-700">₦{total.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-emerald-700">₦{fmtAmount(total)}</p>
         </CardContent>
       </Card>
 
@@ -56,11 +57,11 @@ export default async function TenantPaymentsPage() {
                       <p className="text-sm font-medium capitalize">{tx.transaction_type}</p>
                       <p className="text-xs text-muted-foreground">
                         {(tx.properties as { title: string } | null)?.title} ·{" "}
-                        {new Date(tx.created_at).toLocaleDateString()}
+                        {fmtDate(tx.created_at)}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold">₦{Number(tx.amount).toLocaleString()}</span>
+                      <span className="font-semibold">₦{fmtAmount(Number(tx.amount))}</span>
                       <Badge variant={statusColors[tx.status] ?? "secondary"} className="capitalize text-xs">
                         {tx.status.replace(/_/g, " ")}
                       </Badge>

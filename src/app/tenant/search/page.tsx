@@ -1,12 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/lib/button-variants";
-import { Input } from "@/components/ui/input";
 import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, fmtAmount } from "@/lib/utils";
+import { SearchForm } from "@/components/tenant/SearchForm";
 
 interface SearchParams {
   city?: string;
@@ -39,15 +38,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <p className="text-muted-foreground mt-1">Browse verified listings from trusted landlords.</p>
       </div>
 
-      {/* Search filters */}
-      <form method="get" className="flex gap-3 mb-8 flex-wrap">
-        <Input name="city" placeholder="City (e.g. Lagos)" defaultValue={params.city} className="w-48" />
-        <Input name="max_price" type="number" placeholder="Max rent (₦)" defaultValue={params.max_price} className="w-44" />
-        <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">Search</Button>
-        {(params.city || params.max_price) && (
-          <Link href="/tenant/search" className={buttonVariants({ variant: "outline" })}>Clear</Link>
-        )}
-      </form>
+      <SearchForm city={params.city} maxPrice={params.max_price} />
 
       {!properties || properties.length === 0 ? (
         <Card>
@@ -74,7 +65,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-emerald-700 text-lg">
-                    ₦{Number(property.rent_amount).toLocaleString()}
+                    ₦{fmtAmount(Number(property.rent_amount))}
                     <span className="text-sm font-normal text-muted-foreground">/mo</span>
                   </span>
                   <Badge variant="secondary" className="capitalize">{property.property_type}</Badge>

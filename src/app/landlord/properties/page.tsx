@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/lib/button-variants";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, fmtAmount } from "@/lib/utils";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
 
 export default async function PropertiesPage() {
@@ -59,7 +59,7 @@ export default async function PropertiesPage() {
 
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-emerald-700">
-                    ₦{Number(property.rent_amount).toLocaleString()}/mo
+                    ₦{fmtAmount(Number(property.rent_amount))}/mo
                   </span>
                   <Badge variant={property.status === "active" ? "default" : "secondary"} className="capitalize">
                     {property.status}

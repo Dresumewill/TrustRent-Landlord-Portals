@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BadgeCheck, Clock, FileX } from "lucide-react";
 import { VerificationModal } from "@/components/admin/VerificationModal";
+import { fmtDate } from "@/lib/utils";
 
 const statusVariant: Record<string, "default" | "secondary" | "destructive"> = {
   pending:    "secondary",
@@ -86,9 +87,7 @@ export default async function VerificationQueuePage() {
                       </TableCell>
                       <TableCell className="text-slate-600 text-sm">{landlord.email}</TableCell>
                       <TableCell className="text-slate-500 text-sm">
-                        {new Date(landlord.created_at).toLocaleDateString("en-GB", {
-                          day: "numeric", month: "short", year: "numeric",
-                        })}
+                        {fmtDate(landlord.created_at)}
                       </TableCell>
                       <TableCell>
                         <span className={`text-xs font-medium ${docs.color}`}>{docs.label}</span>
@@ -153,9 +152,7 @@ export default async function VerificationQueuePage() {
                       </TableCell>
                       <TableCell className="text-slate-600 text-sm">{landlord.email}</TableCell>
                       <TableCell className="text-slate-500 text-sm">
-                        {new Date(landlord.created_at).toLocaleDateString("en-GB", {
-                          day: "numeric", month: "short", year: "numeric",
-                        })}
+                        {fmtDate(landlord.created_at)}
                       </TableCell>
                       <TableCell>
                         <span className={`text-xs font-medium ${docs.color}`}>{docs.label}</span>

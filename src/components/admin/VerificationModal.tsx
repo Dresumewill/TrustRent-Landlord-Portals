@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, FileText, ShieldCheck, AlertCircle } from "lucide-react";
 import { verifyLandlord, rejectLandlord } from "@/app/actions/admin";
+import { fmtDate } from "@/lib/utils";
 
 interface PendingLandlord {
   id: string;
@@ -133,7 +134,7 @@ export function VerificationModal({ landlord, trigger }: VerificationModalProps)
                 <p className="font-semibold text-slate-900 text-sm">{landlord.full_name ?? "—"}</p>
                 <p className="text-xs text-slate-500">{landlord.email}</p>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Joined {new Date(landlord.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                  Joined {fmtDate(landlord.created_at)}
                 </p>
               </div>
               <Badge variant="secondary" className="capitalize text-xs">
