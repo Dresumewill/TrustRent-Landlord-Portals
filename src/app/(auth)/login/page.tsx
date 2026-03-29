@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,28 +19,35 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const supabase = createClient();
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (authError || !data.user) {
-      setError(authError?.message ?? "Sign in failed. Please try again.");
+      if (authError || !data.user) {
+        setError(authError?.message ?? "Sign in failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Redirect based on role — fall back to tenant dashboard if profile missing
+      const { data: profile } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      const role = profile?.role;
+      // Use full-page navigation so the server proxy sees the fresh auth cookies.
+      if (role === "landlord") {
+        window.location.href = "/landlord/dashboard";
+      } else if (role === "admin") {
+        window.location.href = "/admin/dashboard";
+      } else {
+        window.location.href = "/tenant/dashboard";
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
-      return;
-    }
-
-    // Redirect based on role
-    const { data: profile } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", data.user.id)
-      .single();
-
-    if (profile?.role === "landlord") {
-      router.push("/landlord/dashboard");
-    } else if (profile?.role === "admin") {
-      router.push("/admin/dashboard");
-    } else {
-      router.push("/tenant/dashboard");
     }
   }
 
