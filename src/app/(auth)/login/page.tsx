@@ -46,7 +46,8 @@ export default function LoginPage() {
         window.location.href = "/tenant/dashboard";
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setError(`Sign-in failed: ${msg}`);
       setLoading(false);
     }
   }
