@@ -10,7 +10,11 @@ export default async function VerificationPage() {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("full_name, verification_status, trust_score")
+    .select(`
+      full_name, verification_status, trust_score,
+      id_document_url, deed_document_url,
+      utility_bill_url, tax_clearance_url
+    `)
     .eq("id", user?.id ?? "")
     .single();
 
@@ -23,7 +27,6 @@ export default async function VerificationPage() {
 
   return (
     <div className="p-8 max-w-3xl">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
           <ShieldCheck className="h-6 w-6 text-emerald-600" />
@@ -34,7 +37,6 @@ export default async function VerificationPage() {
         </p>
       </div>
 
-      {/* Current status banner */}
       <Card className="mb-6 border-slate-200">
         <CardContent className="pt-5 pb-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -66,7 +68,6 @@ export default async function VerificationPage() {
         </CardContent>
       </Card>
 
-      {/* Info box */}
       <div className="flex gap-3 rounded-lg bg-blue-50 border border-blue-100 p-4 mb-6 text-sm text-blue-800">
         <Info className="h-4 w-4 shrink-0 mt-0.5 text-blue-500" />
         <p>
@@ -75,8 +76,16 @@ export default async function VerificationPage() {
         </p>
       </div>
 
-      {/* The checklist */}
-      <TrustChecklist />
+      <TrustChecklist
+        userId={user?.id ?? ""}
+        docPaths={{
+          id_document_url:  profile?.id_document_url  ?? null,
+          deed_document_url: profile?.deed_document_url ?? null,
+          utility_bill_url:  profile?.utility_bill_url  ?? null,
+          tax_clearance_url: profile?.tax_clearance_url ?? null,
+        }}
+        verificationStatus={profile?.verification_status ?? "unverified"}
+      />
     </div>
   );
 }

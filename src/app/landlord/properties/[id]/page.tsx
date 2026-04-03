@@ -21,7 +21,7 @@ export default async function PropertyDetailPage({ params }: Props) {
 
   const { data: property } = await supabase
     .from("properties")
-    .select("*")
+    .select("*, images")
     .eq("id", id)
     .eq("landlord_id", user?.id ?? "")
     .single();

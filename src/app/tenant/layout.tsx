@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { ShieldCheck, LayoutDashboard, Search, FileText, CreditCard, LogOut } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, Search, FileText, CreditCard, LogOut, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
-  { href: "/tenant/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/tenant/search", icon: Search, label: "Find a Home" },
-  { href: "/tenant/applications", icon: FileText, label: "My Applications" },
-  { href: "/tenant/payments", icon: CreditCard, label: "Payments" },
+  { href: "/tenant/dashboard",      icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/tenant/search",         icon: Search,          label: "Find a Home" },
+  { href: "/tenant/applications",   icon: FileText,        label: "My Applications" },
+  { href: "/tenant/payments",       icon: CreditCard,      label: "Payments" },
+  { href: "/tenant/profile",        icon: UserCircle,      label: "Profile" },
 ];
 
 export default function TenantLayout({ children }: { children: React.ReactNode }) {

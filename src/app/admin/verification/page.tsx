@@ -16,6 +16,27 @@ const statusVariant: Record<string, "default" | "secondary" | "destructive"> = {
   unverified: "secondary",
 };
 
+async function getSignedUrls(db: ReturnType<typeof createAdminClient>, landlord: {
+  id_document_url: string | null;
+  deed_document_url: string | null;
+}) {
+  const EXPIRY = 60 * 60; // 1 hour
+
+  const [idResult, deedResult] = await Promise.all([
+    landlord.id_document_url
+      ? db.storage.from("landlord-documents").createSignedUrl(landlord.id_document_url, EXPIRY)
+      : Promise.resolve({ data: null }),
+    landlord.deed_document_url
+      ? db.storage.from("landlord-documents").createSignedUrl(landlord.deed_document_url, EXPIRY)
+      : Promise.resolve({ data: null }),
+  ]);
+
+  return {
+    id_document:   idResult.data?.signedUrl   ?? null,
+    deed_document: deedResult.data?.signedUrl ?? null,
+  };
+}
+
 export default async function VerificationQueuePage() {
   const db = createAdminClient();
 
@@ -25,8 +46,16 @@ export default async function VerificationQueuePage() {
     .eq("role", "landlord")
     .order("created_at", { ascending: false });
 
-  const pending    = landlords?.filter((l) => l.verification_status === "pending") ?? [];
-  const others     = landlords?.filter((l) => l.verification_status !== "pending") ?? [];
+  const pending = landlords?.filter((l) => l.verification_status === "pending") ?? [];
+  const others  = landlords?.filter((l) => l.verification_status !== "pending") ?? [];
+
+  // Generate signed URLs for all pending landlords (1-hour expiry)
+  const pendingWithUrls = await Promise.all(
+    pending.map(async (landlord) => ({
+      landlord,
+      signedUrls: await getSignedUrls(db, landlord),
+    }))
+  );
 
   const docStatus = (l: typeof pending[number]) => {
     const hasId   = !!l.id_document_url;
@@ -42,9 +71,7 @@ export default async function VerificationQueuePage() {
         <BadgeCheck className="h-6 w-6 text-slate-400" />
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Verification Queue</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            Review and approve landlord identity documents.
-          </p>
+          <p className="text-slate-500 text-sm mt-0.5">Review and approve landlord identity documents.</p>
         </div>
       </div>
 
@@ -78,17 +105,13 @@ export default async function VerificationQueuePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pending.map((landlord) => {
+                {pendingWithUrls.map(({ landlord, signedUrls }) => {
                   const docs = docStatus(landlord);
                   return (
                     <TableRow key={landlord.id} className="hover:bg-slate-50/80">
-                      <TableCell className="pl-6 font-medium text-slate-900">
-                        {landlord.full_name ?? "—"}
-                      </TableCell>
+                      <TableCell className="pl-6 font-medium text-slate-900">{landlord.full_name ?? "—"}</TableCell>
                       <TableCell className="text-slate-600 text-sm">{landlord.email}</TableCell>
-                      <TableCell className="text-slate-500 text-sm">
-                        {fmtDate(landlord.created_at)}
-                      </TableCell>
+                      <TableCell className="text-slate-500 text-sm">{fmtDate(landlord.created_at)}</TableCell>
                       <TableCell>
                         <span className={`text-xs font-medium ${docs.color}`}>{docs.label}</span>
                       </TableCell>
@@ -100,6 +123,7 @@ export default async function VerificationQueuePage() {
                       <TableCell className="pr-6 text-right">
                         <VerificationModal
                           landlord={landlord}
+                          signedUrls={signedUrls}
                           trigger={
                             <span className="text-xs font-medium text-slate-600 hover:text-slate-900 underline underline-offset-2 cursor-pointer">
                               Review →
@@ -147,13 +171,9 @@ export default async function VerificationQueuePage() {
                   const docs = docStatus(landlord);
                   return (
                     <TableRow key={landlord.id} className="hover:bg-slate-50/80">
-                      <TableCell className="pl-6 font-medium text-slate-900">
-                        {landlord.full_name ?? "—"}
-                      </TableCell>
+                      <TableCell className="pl-6 font-medium text-slate-900">{landlord.full_name ?? "—"}</TableCell>
                       <TableCell className="text-slate-600 text-sm">{landlord.email}</TableCell>
-                      <TableCell className="text-slate-500 text-sm">
-                        {fmtDate(landlord.created_at)}
-                      </TableCell>
+                      <TableCell className="text-slate-500 text-sm">{fmtDate(landlord.created_at)}</TableCell>
                       <TableCell>
                         <span className={`text-xs font-medium ${docs.color}`}>{docs.label}</span>
                       </TableCell>

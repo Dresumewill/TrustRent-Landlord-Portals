@@ -3,9 +3,10 @@
 import { useState, useRef } from "react";
 import { ShieldCheck, Upload, CheckCircle2, Clock, AlertCircle, FileText, CreditCard, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 type StepStatus = "pending" | "uploaded" | "verified" | "rejected";
 
@@ -16,28 +17,29 @@ interface ChecklistStep {
   icon: React.ElementType;
   points: number;
   accept: string;
+  dbColumn: "id_document_url" | "deed_document_url" | "utility_bill_url" | "tax_clearance_url";
   status: StepStatus;
   fileName?: string;
 }
 
-const INITIAL_STEPS: ChecklistStep[] = [
+const STEP_DEFINITIONS = [
   {
     id: "id_document",
     title: "Government-Issued ID",
     description: "Upload a valid National ID, International Passport, or Driver's Licence.",
     icon: CreditCard,
     points: 35,
-    accept: "image/*,application/pdf",
-    status: "pending",
+    accept: "image/jpeg,image/png,image/webp,application/pdf",
+    dbColumn: "id_document_url" as const,
   },
   {
     id: "property_deed",
     title: "Property Deed / Title",
-    description: "Upload the Certificate of Occupancy (C-of-O) or equivalent title document for your property.",
+    description: "Upload the Certificate of Occupancy (C-of-O) or equivalent title document.",
     icon: Home,
     points: 35,
-    accept: "image/*,application/pdf",
-    status: "pending",
+    accept: "image/jpeg,image/png,image/webp,application/pdf",
+    dbColumn: "deed_document_url" as const,
   },
   {
     id: "utility_bill",
@@ -45,8 +47,8 @@ const INITIAL_STEPS: ChecklistStep[] = [
     description: "A utility bill, bank statement, or official letter dated within the last 3 months.",
     icon: FileText,
     points: 20,
-    accept: "image/*,application/pdf",
-    status: "pending",
+    accept: "image/jpeg,image/png,image/webp,application/pdf",
+    dbColumn: "utility_bill_url" as const,
   },
   {
     id: "tax_clearance",
@@ -54,8 +56,8 @@ const INITIAL_STEPS: ChecklistStep[] = [
     description: "Current-year tax clearance from the Federal Inland Revenue Service (FIRS).",
     icon: FileText,
     points: 10,
-    accept: "image/*,application/pdf",
-    status: "pending",
+    accept: "image/jpeg,image/png,image/webp,application/pdf",
+    dbColumn: "tax_clearance_url" as const,
   },
 ];
 
@@ -66,9 +68,44 @@ const STATUS_CONFIG: Record<StepStatus, { label: string; color: string; icon: Re
   rejected: { label: "Rejected",      color: "text-red-500",     icon: AlertCircle },
 };
 
-export function TrustChecklist() {
-  const [steps, setSteps] = useState<ChecklistStep[]>(INITIAL_STEPS);
+interface DocPaths {
+  id_document_url:  string | null;
+  deed_document_url: string | null;
+  utility_bill_url:  string | null;
+  tax_clearance_url: string | null;
+}
+
+interface TrustChecklistProps {
+  userId: string;
+  docPaths: DocPaths;
+  verificationStatus: string;
+}
+
+function deriveStatus(
+  path: string | null,
+  verificationStatus: string
+): StepStatus {
+  if (!path) return "pending";
+  if (verificationStatus === "verified") return "verified";
+  if (verificationStatus === "rejected") return "rejected";
+  return "uploaded";
+}
+
+function fileNameFromPath(path: string | null): string | undefined {
+  if (!path) return undefined;
+  return path.split("/").pop();
+}
+
+export function TrustChecklist({ userId, docPaths, verificationStatus }: TrustChecklistProps) {
+  const initialSteps: ChecklistStep[] = STEP_DEFINITIONS.map((def) => ({
+    ...def,
+    status: deriveStatus(docPaths[def.dbColumn], verificationStatus),
+    fileName: fileNameFromPath(docPaths[def.dbColumn]),
+  }));
+
+  const [steps, setSteps] = useState<ChecklistStep[]>(initialSteps);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const score = steps
@@ -81,20 +118,49 @@ export function TrustChecklist() {
 
   const isFullyVerified = score === 100;
 
-  function handleUpload(stepId: string, file: File) {
-    setUploading(stepId);
+  async function handleUpload(step: ChecklistStep, file: File) {
+    setUploading(step.id);
+    setErrors((prev) => ({ ...prev, [step.id]: "" }));
 
-    // Simulate upload + review submission (placeholder)
-    setTimeout(() => {
-      setSteps((prev) =>
-        prev.map((s) =>
-          s.id === stepId
-            ? { ...s, status: "uploaded", fileName: file.name }
-            : s
-        )
-      );
+    const supabase = createClient();
+
+    // Store as {userId}/{stepId}.{ext} — upsert so re-uploads replace the previous file
+    const ext = file.name.split(".").pop() ?? "bin";
+    const path = `${userId}/${step.id}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("landlord-documents")
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) {
+      setErrors((prev) => ({ ...prev, [step.id]: uploadError.message }));
       setUploading(null);
-    }, 1500);
+      return;
+    }
+
+    // Save path to users table and set verification_status to pending
+    const { error: dbError } = await supabase
+      .from("users")
+      .update({
+        [step.dbColumn]: path,
+        verification_status: "pending",
+      })
+      .eq("id", userId);
+
+    if (dbError) {
+      setErrors((prev) => ({ ...prev, [step.id]: dbError.message }));
+      setUploading(null);
+      return;
+    }
+
+    setSteps((prev) =>
+      prev.map((s) =>
+        s.id === step.id
+          ? { ...s, status: "uploaded", fileName: file.name }
+          : s
+      )
+    );
+    setUploading(null);
   }
 
   function triggerFileInput(stepId: string) {
@@ -137,8 +203,8 @@ export function TrustChecklist() {
               {isFullyVerified
                 ? "Your identity is fully verified. Your listings display the TrustRent Verified badge."
                 : pendingScore > 0
-                ? `${pendingScore} points pending review. Complete remaining steps to unlock verified listings.`
-                : "Complete the checklist below to get your listings verified and build tenant trust."}
+                ? `${pendingScore} points pending admin review (1–2 business days).`
+                : "Upload the documents below to begin the verification process."}
             </p>
             {!isFullyVerified && (
               <div className="flex items-center gap-2 mt-1">
@@ -162,6 +228,7 @@ export function TrustChecklist() {
           const StepIcon = step.icon;
           const isUploading = uploading === step.id;
           const isDone = step.status === "verified";
+          const stepError = errors[step.id];
 
           return (
             <Card
@@ -174,7 +241,6 @@ export function TrustChecklist() {
             >
               <CardContent className="pt-5 pb-5">
                 <div className="flex items-start gap-4">
-                  {/* Step icon */}
                   <div className={cn(
                     "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
                     isDone ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-500"
@@ -182,7 +248,6 @@ export function TrustChecklist() {
                     <StepIcon className="h-5 w-5" />
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="font-semibold text-sm">{step.title}</h4>
@@ -196,9 +261,11 @@ export function TrustChecklist() {
                         📎 {step.fileName}
                       </p>
                     )}
+                    {stepError && (
+                      <p className="text-xs text-red-500 mt-1">{stepError}</p>
+                    )}
                   </div>
 
-                  {/* Status + action */}
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     <div className={cn("flex items-center gap-1 text-xs font-medium", STATUS_CONFIG[step.status].color)}>
                       <StatusIcon className="h-3.5 w-3.5" />
@@ -214,14 +281,16 @@ export function TrustChecklist() {
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if (file) handleUpload(step.id, file);
+                            if (file) handleUpload(step, file);
+                            // reset so same file can be re-selected
+                            e.target.value = "";
                           }}
                         />
                         <Button
                           size="sm"
                           variant="outline"
                           className="gap-1.5 text-xs"
-                          disabled={isUploading}
+                          disabled={isUploading || uploading !== null}
                           onClick={() => triggerFileInput(step.id)}
                         >
                           <Upload className="h-3 w-3" />
@@ -231,7 +300,27 @@ export function TrustChecklist() {
                     )}
 
                     {step.status === "uploaded" && (
-                      <span className="text-xs text-amber-600 font-medium">Awaiting review</span>
+                      <>
+                        <input
+                          ref={(el) => { fileRefs.current[step.id] = el; }}
+                          type="file"
+                          accept={step.accept}
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleUpload(step, file);
+                            e.target.value = "";
+                          }}
+                        />
+                        <span className="text-xs text-amber-600 font-medium">Awaiting review</span>
+                        <button
+                          className="text-xs text-muted-foreground underline"
+                          disabled={isUploading || uploading !== null}
+                          onClick={() => triggerFileInput(step.id)}
+                        >
+                          Replace file
+                        </button>
+                      </>
                     )}
 
                     {isDone && (
@@ -245,7 +334,6 @@ export function TrustChecklist() {
         })}
       </div>
 
-      {/* Info note */}
       <p className="text-xs text-muted-foreground text-center">
         Documents are reviewed by the TrustRent team within 1–2 business days.
         All uploads are encrypted and stored securely.

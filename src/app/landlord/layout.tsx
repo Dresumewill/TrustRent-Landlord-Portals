@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShieldCheck, LayoutDashboard, Building2, Users, Wallet, LogOut, BadgeCheck } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, Building2, Users, Wallet, LogOut, BadgeCheck, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { href: "/landlord/applications",  icon: Users,           label: "Applications" },
   { href: "/landlord/transactions",  icon: Wallet,          label: "Transactions" },
   { href: "/landlord/verification",  icon: BadgeCheck,      label: "Verification" },
+  { href: "/landlord/profile",       icon: UserCircle,      label: "Profile" },
 ];
 
 export default function LandlordLayout({ children }: { children: React.ReactNode }) {

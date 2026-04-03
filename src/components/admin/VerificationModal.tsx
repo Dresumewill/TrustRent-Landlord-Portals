@@ -25,9 +25,15 @@ interface PendingLandlord {
   verification_status: string;
 }
 
+interface SignedUrls {
+  id_document: string | null;
+  deed_document: string | null;
+}
+
 interface VerificationModalProps {
   landlord: PendingLandlord;
   trigger: React.ReactNode;
+  signedUrls?: SignedUrls;
 }
 
 function DocumentPreview({ url, label }: { url: string | null; label: string }) {
@@ -40,7 +46,9 @@ function DocumentPreview({ url, label }: { url: string | null; label: string }) 
     );
   }
 
-  const isPdf = url.toLowerCase().endsWith(".pdf");
+  // Determine if it's a PDF by checking the URL path (before query params)
+  const pathPart = url.split("?")[0];
+  const isPdf = pathPart.toLowerCase().endsWith(".pdf");
 
   return (
     <div className="rounded-lg border border-slate-200 overflow-hidden">
@@ -65,7 +73,7 @@ function DocumentPreview({ url, label }: { url: string | null; label: string }) 
   );
 }
 
-export function VerificationModal({ landlord, trigger }: VerificationModalProps) {
+export function VerificationModal({ landlord, trigger, signedUrls }: VerificationModalProps) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"main" | "reject">("main");
   const [reason, setReason] = useState("");
@@ -75,7 +83,6 @@ export function VerificationModal({ landlord, trigger }: VerificationModalProps)
   function handleOpenChange(val: boolean) {
     setOpen(val);
     if (!val) {
-      // Reset state on close
       setTimeout(() => { setView("main"); setReason(""); setResult(null); }, 200);
     }
   }
@@ -107,6 +114,10 @@ export function VerificationModal({ landlord, trigger }: VerificationModalProps)
 
   const isDone = result?.type === "success";
 
+  // Use signed URLs if provided, otherwise fall back to stored paths (for public URLs)
+  const idDocUrl = signedUrls?.id_document ?? landlord.id_document_url;
+  const deedDocUrl = signedUrls?.deed_document ?? landlord.deed_document_url;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <div onClick={() => setOpen(true)} className="cursor-pointer">
@@ -128,7 +139,6 @@ export function VerificationModal({ landlord, trigger }: VerificationModalProps)
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {/* Landlord info */}
             <div className="flex items-start justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
               <div>
                 <p className="font-semibold text-slate-900 text-sm">{landlord.full_name ?? "—"}</p>
@@ -142,19 +152,17 @@ export function VerificationModal({ landlord, trigger }: VerificationModalProps)
               </Badge>
             </div>
 
-            {/* Documents */}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <p className="text-xs font-medium text-slate-600">Government ID</p>
-                <DocumentPreview url={landlord.id_document_url} label="Government ID" />
+                <DocumentPreview url={idDocUrl} label="Government ID" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <p className="text-xs font-medium text-slate-600">Property Deed / Title</p>
-                <DocumentPreview url={landlord.deed_document_url} label="Property Deed" />
+                <DocumentPreview url={deedDocUrl} label="Property Deed" />
               </div>
             </div>
 
-            {/* Error */}
             {result?.type === "error" && (
               <div className="flex items-center gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
@@ -162,12 +170,11 @@ export function VerificationModal({ landlord, trigger }: VerificationModalProps)
               </div>
             )}
 
-            {/* Rejection reason input */}
             {view === "reject" && (
               <div className="flex flex-col gap-2">
                 <p className="text-xs font-medium text-slate-700">Rejection Reason</p>
                 <Textarea
-                  placeholder="Explain why the documents were rejected (this will be sent to the landlord)…"
+                  placeholder="Explain why the documents were rejected…"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   className="text-sm resize-none"
@@ -203,12 +210,7 @@ export function VerificationModal({ landlord, trigger }: VerificationModalProps)
               </>
             ) : (
               <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setView("main")}
-                  disabled={loading !== null}
-                >
+                <Button variant="outline" size="sm" onClick={() => setView("main")} disabled={loading !== null}>
                   Back
                 </Button>
                 <Button

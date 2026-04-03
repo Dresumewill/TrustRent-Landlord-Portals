@@ -114,6 +114,20 @@ export default async function PropertyDetailPage({ params }: Props) {
         </Card>
       </div>
 
+      {/* Photos */}
+      {property.images && property.images.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+          {(property.images as string[]).map((url, i) => (
+            <img
+              key={i}
+              src={url}
+              alt={`${property.title} photo ${i + 1}`}
+              className="w-full h-40 object-cover rounded-lg border border-border"
+            />
+          ))}
+        </div>
+      )}
+
       {/* Description */}
       {property.description && (
         <Card className="mb-4">
