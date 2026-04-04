@@ -19,21 +19,27 @@ const statusVariant: Record<string, "default" | "secondary" | "destructive"> = {
 async function getSignedUrls(db: ReturnType<typeof createAdminClient>, landlord: {
   id_document_url: string | null;
   deed_document_url: string | null;
+  utility_bill_url: string | null;
+  tax_clearance_url: string | null;
 }) {
   const EXPIRY = 60 * 60; // 1 hour
+  const sign = (path: string | null) =>
+    path
+      ? db.storage.from("landlord-documents").createSignedUrl(path, EXPIRY)
+      : Promise.resolve({ data: null });
 
-  const [idResult, deedResult] = await Promise.all([
-    landlord.id_document_url
-      ? db.storage.from("landlord-documents").createSignedUrl(landlord.id_document_url, EXPIRY)
-      : Promise.resolve({ data: null }),
-    landlord.deed_document_url
-      ? db.storage.from("landlord-documents").createSignedUrl(landlord.deed_document_url, EXPIRY)
-      : Promise.resolve({ data: null }),
+  const [idResult, deedResult, utilityResult, taxResult] = await Promise.all([
+    sign(landlord.id_document_url),
+    sign(landlord.deed_document_url),
+    sign(landlord.utility_bill_url),
+    sign(landlord.tax_clearance_url),
   ]);
 
   return {
-    id_document:   idResult.data?.signedUrl   ?? null,
-    deed_document: deedResult.data?.signedUrl ?? null,
+    id_document:   idResult.data?.signedUrl      ?? null,
+    deed_document: deedResult.data?.signedUrl    ?? null,
+    utility_bill:  utilityResult.data?.signedUrl ?? null,
+    tax_clearance: taxResult.data?.signedUrl     ?? null,
   };
 }
 
@@ -42,7 +48,7 @@ export default async function VerificationQueuePage() {
 
   const { data: landlords } = await db
     .from("users")
-    .select("id, full_name, email, created_at, verification_status, id_document_url, deed_document_url")
+    .select("id, full_name, email, created_at, verification_status, id_document_url, deed_document_url, utility_bill_url, tax_clearance_url")
     .eq("role", "landlord")
     .order("created_at", { ascending: false });
 
@@ -58,11 +64,10 @@ export default async function VerificationQueuePage() {
   );
 
   const docStatus = (l: typeof pending[number]) => {
-    const hasId   = !!l.id_document_url;
-    const hasDeed = !!l.deed_document_url;
-    if (hasId && hasDeed) return { label: "Both uploaded", color: "text-emerald-600" };
-    if (hasId || hasDeed) return { label: "Partial",       color: "text-amber-600" };
-    return                       { label: "None uploaded",  color: "text-slate-400" };
+    const count = [l.id_document_url, l.deed_document_url, l.utility_bill_url, l.tax_clearance_url].filter(Boolean).length;
+    if (count === 4) return { label: "All 4 uploaded",  color: "text-emerald-600" };
+    if (count > 0)  return { label: `${count}/4 uploaded`, color: "text-amber-600" };
+    return                  { label: "None uploaded",    color: "text-slate-400" };
   };
 
   return (

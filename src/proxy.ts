@@ -39,6 +39,11 @@ export async function proxy(request: NextRequest) {
 
   // Role-based route protection
   if (user && (isLandlordRoute || isTenantRoute || isAdminRoute)) {
+    // Enforce email verification for non-admin protected routes
+    if (!isAdminRoute && !user.email_confirmed_at) {
+      return NextResponse.redirect(new URL("/verify-email", request.url));
+    }
+
     const { data: profile } = await supabase
       .from("users")
       .select("role")

@@ -94,12 +94,21 @@ export async function POST(request: Request) {
 
   if (event.type === "payment_intent.payment_failed") {
     const pi = event.data.object as Stripe.PaymentIntent;
-    // Mark any pending transaction with this reference as failed
     await db
       .from("transactions")
       .update({ status: "failed", provider_response: pi as unknown as Record<string, unknown> })
       .eq("reference", pi.id)
       .eq("status", "pending");
+  }
+
+  if (event.type === "payment_intent.canceled") {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    // Remove any pending/escrow record so the tenant can retry
+    await db
+      .from("transactions")
+      .delete()
+      .eq("reference", pi.id)
+      .in("status", ["pending", "held_in_escrow"]);
   }
 
   return new Response("OK", { status: 200 });

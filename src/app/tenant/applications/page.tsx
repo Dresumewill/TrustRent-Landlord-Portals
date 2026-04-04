@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/button-variants";
 import { cn, fmtCurrency, fmtDate } from "@/lib/utils";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Eye } from "lucide-react";
 
 export default async function TenantApplicationsPage() {
   const supabase = await createClient();
@@ -86,24 +86,34 @@ export default async function TenantApplicationsPage() {
                     </div>
                   </div>
 
-                  {app.status === "approved" && !alreadyPaid && (
+                  <div className="flex flex-wrap items-center gap-2">
                     <Link
-                      href={`/tenant/payments/deposit/${app.id}`}
-                      className={cn(
-                        buttonVariants({ size: "sm" }),
-                        "bg-emerald-600 hover:bg-emerald-700 text-white gap-2 self-start"
-                      )}
+                      href={`/tenant/applications/${app.id}`}
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
                     >
-                      <CreditCard className="h-3.5 w-3.5" />
-                      Pay Deposit into Escrow
+                      <Eye className="h-3.5 w-3.5" />
+                      View Details
                     </Link>
-                  )}
 
-                  {app.status === "approved" && alreadyPaid && (
-                    <p className="text-xs text-emerald-700 font-medium">
-                      ✓ Deposit paid · <Link href="/tenant/payments" className="underline">View in Payments</Link>
-                    </p>
-                  )}
+                    {app.status === "approved" && !alreadyPaid && (
+                      <Link
+                        href={`/tenant/payments/deposit/${app.id}`}
+                        className={cn(
+                          buttonVariants({ size: "sm" }),
+                          "bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                        )}
+                      >
+                        <CreditCard className="h-3.5 w-3.5" />
+                        Pay Deposit
+                      </Link>
+                    )}
+
+                    {app.status === "approved" && alreadyPaid && (
+                      <p className="text-xs text-emerald-700 font-medium">
+                        ✓ Deposit paid · <Link href="/tenant/payments" className="underline">View in Payments</Link>
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             );

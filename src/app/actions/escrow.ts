@@ -105,6 +105,12 @@ export async function confirmMoveIn(transactionId: string) {
     });
   }
 
+  // Update trust scores: +0.25 per completed tenancy (capped at 5)
+  await Promise.all([
+    db.rpc("increment_trust_score", { user_id: tx.payer_id,  delta: 0.25 }),
+    db.rpc("increment_trust_score", { user_id: tx.payee_id, delta: 0.25 }),
+  ]);
+
   revalidatePath("/tenant/payments");
   return { success: true };
 }

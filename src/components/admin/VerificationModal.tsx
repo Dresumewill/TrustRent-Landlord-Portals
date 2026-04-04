@@ -22,12 +22,16 @@ interface PendingLandlord {
   created_at: string;
   id_document_url: string | null;
   deed_document_url: string | null;
+  utility_bill_url?: string | null;
+  tax_clearance_url?: string | null;
   verification_status: string;
 }
 
 interface SignedUrls {
   id_document: string | null;
   deed_document: string | null;
+  utility_bill?: string | null;
+  tax_clearance?: string | null;
 }
 
 interface VerificationModalProps {
@@ -36,17 +40,16 @@ interface VerificationModalProps {
   signedUrls?: SignedUrls;
 }
 
-function DocumentPreview({ url, label }: { url: string | null; label: string }) {
+function DocumentPreview({ url, label }: { url: string | null | undefined; label: string }) {
   if (!url) {
     return (
-      <div className="flex flex-col items-center justify-center h-32 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400 text-xs gap-2">
+      <div className="flex flex-col items-center justify-center h-28 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400 text-xs gap-2">
         <FileText className="h-5 w-5" />
         <span>No {label} uploaded</span>
       </div>
     );
   }
 
-  // Determine if it's a PDF by checking the URL path (before query params)
   const pathPart = url.split("?")[0];
   const isPdf = pathPart.toLowerCase().endsWith(".pdf");
 
@@ -63,11 +66,7 @@ function DocumentPreview({ url, label }: { url: string | null; label: string }) 
           View {label} (PDF)
         </a>
       ) : (
-        <img
-          src={url}
-          alt={label}
-          className="w-full h-40 object-cover"
-        />
+        <img src={url} alt={label} className="w-full h-32 object-cover" />
       )}
     </div>
   );
@@ -114,9 +113,17 @@ export function VerificationModal({ landlord, trigger, signedUrls }: Verificatio
 
   const isDone = result?.type === "success";
 
-  // Use signed URLs if provided, otherwise fall back to stored paths (for public URLs)
-  const idDocUrl = signedUrls?.id_document ?? landlord.id_document_url;
-  const deedDocUrl = signedUrls?.deed_document ?? landlord.deed_document_url;
+  const idDocUrl       = signedUrls?.id_document   ?? landlord.id_document_url;
+  const deedDocUrl     = signedUrls?.deed_document  ?? landlord.deed_document_url;
+  const utilityUrl     = signedUrls?.utility_bill   ?? landlord.utility_bill_url;
+  const taxUrl         = signedUrls?.tax_clearance  ?? landlord.tax_clearance_url;
+
+  const docs = [
+    { url: idDocUrl,    label: "Government ID" },
+    { url: deedDocUrl,  label: "Property Deed / Title" },
+    { url: utilityUrl,  label: "Utility Bill" },
+    { url: taxUrl,      label: "Tax Clearance" },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -124,7 +131,7 @@ export function VerificationModal({ landlord, trigger, signedUrls }: Verificatio
         {trigger}
       </div>
 
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-slate-400" />
@@ -139,6 +146,7 @@ export function VerificationModal({ landlord, trigger, signedUrls }: Verificatio
           </div>
         ) : (
           <div className="flex flex-col gap-4">
+            {/* Landlord info */}
             <div className="flex items-start justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
               <div>
                 <p className="font-semibold text-slate-900 text-sm">{landlord.full_name ?? "—"}</p>
@@ -152,15 +160,14 @@ export function VerificationModal({ landlord, trigger, signedUrls }: Verificatio
               </Badge>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-medium text-slate-600">Government ID</p>
-                <DocumentPreview url={idDocUrl} label="Government ID" />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-medium text-slate-600">Property Deed / Title</p>
-                <DocumentPreview url={deedDocUrl} label="Property Deed" />
-              </div>
+            {/* All 4 documents in a 2×2 grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {docs.map(({ url, label }) => (
+                <div key={label} className="flex flex-col gap-1.5">
+                  <p className="text-xs font-medium text-slate-600">{label}</p>
+                  <DocumentPreview url={url} label={label} />
+                </div>
+              ))}
             </div>
 
             {result?.type === "error" && (

@@ -19,7 +19,9 @@ import {
   CalendarDays,
   Users,
   FileText,
+  StickyNote,
 } from "lucide-react";
+import { LandlordNoteForm } from "./LandlordNoteForm";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -293,13 +295,21 @@ export default async function TenantPassportPage({ params }: Props) {
         </Card>
       )}
 
-      {application.status === "approved" && application.landlord_note && (
-        <Card>
-          <CardContent className="pt-4 pb-4">
-            <p className="text-sm text-muted-foreground">Your note: {application.landlord_note}</p>
-          </CardContent>
-        </Card>
-      )}
+      {/* ── Landlord private note ───────────────────────────── */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <StickyNote className="h-4 w-4 text-muted-foreground" />
+            Private Note
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <LandlordNoteForm
+            applicationId={id}
+            initialNote={application.landlord_note ?? null}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

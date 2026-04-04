@@ -6,6 +6,32 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { emailNewApplication } from "@/lib/email";
 
+export async function saveLandlordNote(applicationId: string, note: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  // Verify this landlord owns the property on this application
+  const { data: application } = await supabase
+    .from("applications")
+    .select("id, properties!inner(landlord_id)")
+    .eq("id", applicationId)
+    .single();
+
+  const prop = application?.properties as unknown as { landlord_id: string } | null;
+  if (prop?.landlord_id !== user.id) return { error: "Access denied." };
+
+  const { error } = await supabase
+    .from("applications")
+    .update({ landlord_note: note.trim() || null })
+    .eq("id", applicationId);
+
+  if (error) return { error: "Failed to save note." };
+
+  revalidatePath(`/landlord/applications/${applicationId}`);
+  return { success: true };
+}
+
 export async function submitApplication(data: {
   propertyId: string;
   moveInDate: string | null;
