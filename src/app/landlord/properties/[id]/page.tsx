@@ -8,6 +8,7 @@ import { buttonVariants } from "@/lib/button-variants";
 import { cn, fmtCurrency } from "@/lib/utils";
 import { VerifiedBadge } from "@/components/shared/VerifiedBadge";
 import { EditPropertyForm } from "./EditPropertyForm";
+import { DeletePropertyButton } from "./DeletePropertyButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -98,6 +99,11 @@ export default async function PropertyDetailPage({ params }: Props) {
           </Link>
         </div>
       ) : null}
+
+      {/* Danger zone */}
+      <div className="mb-6 flex justify-end">
+        <DeletePropertyButton propertyId={property.id} />
+      </div>
 
       {/* Edit form */}
       <Card>

@@ -4,28 +4,89 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, Users, Wallet, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/button-variants";
+import { fmtCurrency } from "@/lib/utils";
 
 export default async function LandlordDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [{ count: propertyCount }, { count: applicationCount }, { data: recentApplications }] =
-    await Promise.all([
-      supabase.from("properties").select("*", { count: "exact", head: true }).eq("landlord_id", user?.id ?? ""),
-      supabase.from("applications").select("*", { count: "exact", head: true }).eq("properties.landlord_id", user?.id ?? ""),
-      supabase
-        .from("applications")
-        .select("id, status, created_at, properties(title), users(full_name)")
-        .eq("properties.landlord_id", user?.id ?? "")
-        .order("created_at", { ascending: false })
-        .limit(5),
-    ]);
+  const [
+    { count: propertyCount },
+    { count: pendingApplicationCount },
+    { data: recentApplications },
+    { data: profile },
+    { data: escrowTxs },
+  ] = await Promise.all([
+    supabase
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("landlord_id", user?.id ?? ""),
+
+    supabase
+      .from("applications")
+      .select("id, properties!inner(landlord_id)", { count: "exact", head: true })
+      .eq("properties.landlord_id", user?.id ?? "")
+      .eq("status", "submitted"),
+
+    supabase
+      .from("applications")
+      .select("id, status, created_at, properties!inner(title, landlord_id), users(full_name)")
+      .eq("properties.landlord_id", user?.id ?? "")
+      .order("created_at", { ascending: false })
+      .limit(5),
+
+    supabase
+      .from("users")
+      .select("verification_status")
+      .eq("id", user?.id ?? "")
+      .single(),
+
+    supabase
+      .from("transactions")
+      .select("amount, currency, property_id, properties!inner(landlord_id)")
+      .eq("properties.landlord_id", user?.id ?? "")
+      .eq("status", "held_in_escrow"),
+  ]);
+
+  // Group escrow balance by currency
+  const escrowByCurrency: Record<string, number> = {};
+  (escrowTxs ?? []).forEach((t) => {
+    escrowByCurrency[t.currency] = (escrowByCurrency[t.currency] ?? 0) + Number(t.amount);
+  });
+  const escrowDisplay = Object.entries(escrowByCurrency)
+    .map(([code, amt]) => fmtCurrency(amt, code))
+    .join(" + ") || "—";
+
+  const verificationStatus = profile?.verification_status ?? "unverified";
+  const verificationColor =
+    verificationStatus === "verified"  ? "text-emerald-600" :
+    verificationStatus === "pending"   ? "text-amber-600"   : "text-slate-500";
 
   const stats = [
-    { icon: Building2, label: "Total Properties", value: propertyCount ?? 0, color: "text-emerald-600" },
-    { icon: Users, label: "Pending Applications", value: applicationCount ?? 0, color: "text-blue-600" },
-    { icon: Wallet, label: "Escrow Balance", value: "₦0.00", color: "text-violet-600" },
-    { icon: ShieldCheck, label: "Verification Status", value: "Unverified", color: "text-amber-600" },
+    {
+      icon: Building2,
+      label: "Total Properties",
+      value: propertyCount ?? 0,
+      color: "text-emerald-600",
+    },
+    {
+      icon: Users,
+      label: "Pending Applications",
+      value: pendingApplicationCount ?? 0,
+      color: "text-blue-600",
+    },
+    {
+      icon: Wallet,
+      label: "Escrow Balance",
+      value: escrowDisplay,
+      color: "text-violet-600",
+    },
+    {
+      icon: ShieldCheck,
+      label: "Verification Status",
+      value: verificationStatus.charAt(0).toUpperCase() + verificationStatus.slice(1),
+      color: verificationColor,
+    },
   ];
 
   return (
@@ -63,7 +124,11 @@ export default async function LandlordDashboard() {
         <CardContent>
           {!recentApplications || recentApplications.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">
-              No applications yet. <Link href="/landlord/properties/new" className="text-emerald-600 hover:underline">Add a property</Link> to get started.
+              No applications yet.{" "}
+              <Link href="/landlord/properties/new" className="text-emerald-600 hover:underline">
+                Add a property
+              </Link>{" "}
+              to get started.
             </p>
           ) : (
             <div className="flex flex-col divide-y">
@@ -71,13 +136,25 @@ export default async function LandlordDashboard() {
                 <div key={app.id} className="py-3 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium">
-                      {(Array.isArray(app.users) ? app.users[0] : app.users as { full_name: string } | null)?.full_name ?? "Tenant"}
+                      {(Array.isArray(app.users)
+                        ? app.users[0]
+                        : app.users as { full_name: string } | null
+                      )?.full_name ?? "Tenant"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {(Array.isArray(app.properties) ? app.properties[0] : app.properties as { title: string } | null)?.title ?? "Property"}
+                      {(Array.isArray(app.properties)
+                        ? app.properties[0]
+                        : app.properties as { title: string } | null
+                      )?.title ?? "Property"}
                     </p>
                   </div>
-                  <Badge variant={app.status === "approved" ? "default" : "secondary"} className="capitalize">
+                  <Badge
+                    variant={
+                      app.status === "approved" ? "default" :
+                      app.status === "rejected" ? "destructive" : "secondary"
+                    }
+                    className="capitalize"
+                  >
                     {app.status}
                   </Badge>
                 </div>

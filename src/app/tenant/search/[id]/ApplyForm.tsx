@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/client";
+import { submitApplication } from "@/app/actions/applications";
 
 interface Props {
   propertyId: string;
@@ -67,23 +67,17 @@ export function ApplyForm({ propertyId, alreadyApplied }: Props) {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { window.location.href = "/login"; return; }
-
-    const { error: insertError } = await supabase.from("applications").insert({
-      property_id: propertyId,
-      tenant_id: user.id,
-      move_in_date: moveInDate || null,
-      num_occupants: Number(numOccupants),
-      employment_status: employment,
-      monthly_income: income ? Number(income) : null,
-      message: message || null,
-      trust_score_at_apply: null,
+    const result = await submitApplication({
+      propertyId,
+      moveInDate:       moveInDate || null,
+      numOccupants:     Number(numOccupants),
+      employmentStatus: employment,
+      monthlyIncome:    income ? Number(income) : null,
+      message:          message || null,
     });
 
-    if (insertError) {
-      setError(insertError.message);
+    if (result?.error) {
+      setError(result.error);
       setLoading(false);
       return;
     }
