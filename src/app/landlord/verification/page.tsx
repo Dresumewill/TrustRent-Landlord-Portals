@@ -26,7 +26,7 @@ export default async function VerificationPage() {
   const verifiedProperties = properties?.filter((p) => p.is_verified) ?? [];
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 sm:p-8 max-w-3xl">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
           <ShieldCheck className="h-6 w-6 text-emerald-600" />

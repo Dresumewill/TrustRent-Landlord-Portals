@@ -28,7 +28,7 @@ export default async function DisputesPage() {
   const resolved = disputes?.filter((d) => d.status !== "disputed") ?? [];
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-8 flex items-center gap-3">
         <AlertTriangle className="h-6 w-6 text-red-400" />
         <div>

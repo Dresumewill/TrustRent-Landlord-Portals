@@ -73,7 +73,7 @@ export default function NewPropertyPage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-8 max-w-2xl">
       <h1 className="text-2xl font-bold mb-2">Add New Property</h1>
       <p className="text-muted-foreground mb-8">Fill in the details to create a new listing.</p>
 
@@ -97,7 +97,7 @@ export default function NewPropertyPage() {
             </div>
 
             {/* Country + Currency (auto-filled) */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="country">Country</Label>
                 <select
@@ -123,7 +123,7 @@ export default function NewPropertyPage() {
             </div>
 
             {/* Type + Rent */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="property_type">Type</Label>
                 <select id="property_type" name="property_type" className={selectClass}>
@@ -150,7 +150,7 @@ export default function NewPropertyPage() {
             </div>
 
             {/* Bedrooms + Bathrooms */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="bedrooms">Bedrooms</Label>
                 <Input id="bedrooms" name="bedrooms" type="number" placeholder="2" min="0" />
@@ -167,7 +167,7 @@ export default function NewPropertyPage() {
               <Input id="address_line1" name="address_line1" placeholder="123 Trust Avenue" required />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="city">City</Label>
                 <Input id="city" name="city" placeholder="Lagos" required />

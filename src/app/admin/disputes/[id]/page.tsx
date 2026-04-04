@@ -47,7 +47,7 @@ export default async function DisputeMediationPage({ params }: Props) {
   const isActive  = tx.status === "disputed";
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 sm:p-8 max-w-5xl">
       {/* Back */}
       <Link
         href="/admin/disputes"

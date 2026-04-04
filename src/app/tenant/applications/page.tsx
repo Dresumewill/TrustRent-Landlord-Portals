@@ -26,7 +26,7 @@ export default async function TenantApplicationsPage() {
   const paidApplicationIds = new Set((escrowTxs ?? []).map((t) => t.application_id));
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">My Applications</h1>
         <p className="text-muted-foreground mt-1">Track the status of all your rental applications.</p>

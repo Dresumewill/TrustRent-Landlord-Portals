@@ -32,7 +32,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const { data: properties } = await query;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Find a Home</h1>
         <p className="text-muted-foreground mt-1">Browse verified listings from trusted landlords.</p>

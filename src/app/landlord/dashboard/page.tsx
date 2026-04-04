@@ -90,7 +90,7 @@ export default async function LandlordDashboard() {
   ];
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Landlord Dashboard</h1>
         <p className="text-muted-foreground mt-1">Manage your properties, applications, and payments.</p>

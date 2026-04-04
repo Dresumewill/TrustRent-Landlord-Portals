@@ -41,7 +41,7 @@ export default async function PropertyDetailPage({ params }: Props) {
     .eq("status", "submitted");
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-8 max-w-2xl">
       <Link
         href="/landlord/properties"
         className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 mb-6 -ml-2")}

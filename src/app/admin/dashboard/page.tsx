@@ -100,7 +100,7 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       {/* Header */}
       <div className="mb-8 flex items-center gap-3">
         <TrendingUp className="h-6 w-6 text-slate-400" />

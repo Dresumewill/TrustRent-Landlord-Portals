@@ -28,19 +28,19 @@ export function SearchForm({ city = "", maxPrice = "" }: SearchFormProps) {
   const hasFilters = city || maxPrice;
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-3 mb-8 flex-wrap">
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-8">
       <Input
         placeholder="City (e.g. Lagos)"
         value={cityValue}
         onChange={(e) => setCityValue(e.target.value)}
-        className="w-48"
+        className="w-full sm:w-48"
       />
       <Input
         type="number"
-        placeholder="Max rent (₦)"
+        placeholder="Max rent"
         value={priceValue}
         onChange={(e) => setPriceValue(e.target.value)}
-        className="w-44"
+        className="w-full sm:w-44"
       />
       <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">
         Search

@@ -107,7 +107,7 @@ export default async function TenantPassportPage({ params }: Props) {
     .eq("status", "approved");
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 sm:p-8 max-w-3xl">
       {/* Back link */}
       <Link
         href="/landlord/applications"

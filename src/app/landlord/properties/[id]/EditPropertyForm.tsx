@@ -193,7 +193,7 @@ export function EditPropertyForm({ property }: { property: Property }) {
         <Textarea id="description" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="status">Listing Status</Label>
           <select id="status" value={status} onChange={(e) => setStatus(e.target.value)} className={selectClass}>
@@ -215,7 +215,7 @@ export function EditPropertyForm({ property }: { property: Property }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="rent">Monthly Rent ({property.currency})</Label>
           <Input id="rent" type="number" min="1" value={rent} onChange={(e) => setRent(e.target.value)} required />
@@ -226,7 +226,7 @@ export function EditPropertyForm({ property }: { property: Property }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="bedrooms">Bedrooms</Label>
           <Input id="bedrooms" type="number" min="0" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} />
@@ -242,7 +242,7 @@ export function EditPropertyForm({ property }: { property: Property }) {
         <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} required />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="city">City</Label>
           <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} required />
